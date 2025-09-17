@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎页面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FBFADA', 
+                        secondary: '#12372A', 
+                        accent: '#8B7355',  
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(18, 55, 42, 0.1); 
+            }
+            .transition-custom {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+        }
+    </style>
+</head>
+<body class="bg-primary font-inter min-h-screen flex flex-col text-secondary">
+    
+    <!-- 主内容区 -->
+    <main class="flex-grow flex flex-col items-center justify-center px-4 py-8 max-w-6xl mx-auto w-full">
+        <div class="text-center mb-12 transform transition-all duration-700 hover:scale-105">
+            <h1 class="text-[clamp(2.5rem,5vw,4rem)] font-bold mb-6 tracking-tight text-shadow">
+                欢迎访问
+            </h1>
+            <p class="text-[clamp(1rem,2vw,1.25rem)] text-secondary/90 max-w-2xl mx-auto leading-relaxed">
+                这是一个关于糖尿病可视化的页面
+            </p>
+        </div>
+        
+        <!-- 按钮区域 -->
+        <div class="flex flex-col sm:flex-row gap-6 justify-center w-full max-w-md">
+            <a href="internation.html" class="group relative bg-white text-secondary border-2 border-secondary/20 rounded-xl px-8 py-4 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-custom overflow-hidden">
+                <span class="relative z-10 font-semibold text-lg">国际情况</span>
+                <i class="fa fa-arrow-right relative z-10 group-hover:translate-x-1 transition-transform text-secondary"></i>
+                <div class="absolute inset-0 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+            </a>
+
+            <a href="quanguo.html" class="group relative bg-accent text-white rounded-xl px-8 py-4 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-custom overflow-hidden">
+                <span class="relative z-10 font-semibold text-lg">国内情况</span>
+                <i class="fa fa-user relative z-10 group-hover:translate-x-1 transition-transform"></i>
+                <div class="absolute inset-0 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </a>
+        </div>
+        
+        <!-- 装饰元素 -->
+        <div class="absolute -z-10 w-96 h-96 bg-amber-200/20 rounded-full filter blur-3xl top-1/4 -right-48 animate-pulse"></div>
+        <div class="absolute -z-10 w-96 h-96 bg-amber-100/20 rounded-full filter blur-3xl bottom-1/4 -left-48 animate-pulse" style="animation-delay: 2s"></div>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer class="w-full py-6 text-center text-secondary/70 text-sm border-t border-secondary/10">
+        <p>© 2025 欢迎页面 | 版权所有</p>
+    </footer>
+    
+    <script>
+        // 添加页面加载动画
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('opacity-0');
+            setTimeout(() => {
+                document.body.classList.add('transition-opacity', 'duration-700');
+                document.body.classList.remove('opacity-0');
+            }, 100);
+        });
+        
+        // 按钮悬停效果增强
+        const buttons = document.querySelectorAll('a');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', () => {
+                button.classList.add('scale-105');
+            });
+            button.addEventListener('mouseleave', () => {
+                button.classList.remove('scale-105');
+            });
+        });
+    </script>
+</body>
+</html>

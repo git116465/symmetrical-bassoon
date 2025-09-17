@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>糖尿病数据可视化</title>
+  <link rel="stylesheet" href="quanguo.css"/>
+   <link rel="stylesheet" href="prevention.css">
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  <!-- 引入ECharts相关资源 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 配置Tailwind自定义颜色 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+          },
+        },
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- 头部区域 -->
+  <header>
+    <h1>糖尿病数据可视化平台</h1>
+    <div class="showTime"></div>
+    <script>
+      // 时钟逻辑保持不变
+      var t = null;
+      t = setTimeout(time, 1000); 
+      function time() {
+        clearTimeout(t); 
+        dt = new Date();
+        var y = dt.getFullYear();
+        var mt = dt.getMonth() + 1;
+        var day = dt.getDate();
+        var h = dt.getHours(); 
+        var m = dt.getMinutes(); 
+        var s = dt.getSeconds(); 
+        document.querySelector(".showTime").innerHTML =
+          "当前时间：" + y + "年" + mt + "月" + day + "日" + h + "时" + m + "分" + s + "秒";
+        t = setTimeout(time, 1000); 
+      }
+    </script>
+  </header>
+
+  <!-- 顶部导航栏 -->
+  <nav class="nav-bar">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center">
+          <div class="text-xl font-bold logo-text"><i class="fa fa-heartbeat mr-2"></i>糖尿病数据中心</div>
+        </div>
+        <div class="hidden md:flex space-x-8">
+          <a href="quanguo.html" class="nav-link ">首页</a>
+          <a href="bingfa.html" class="nav-link bingfa-link">并发症状</a>
+          <a href="trend.html" class="nav-link trend-link">趋势分析</a>
+          <a href="prevention.html" class="nav-link prevention-link active">预防措施</a>
+          <a href="risk.html" class="nav-link">风险评估</a>
+        </div>
+        <div class="flex items-center">
+          <div class="hidden md:block mr-4 text-sm text-gray-300"><span>管理员</span><i class="fa fa-user-circle ml-2"></i></div>
+          <button class="md:hidden nav-toggle"><i class="fa fa-bars"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="md:hidden hidden" id="mobile-menu">
+      <div class="px-4 py-2 space-y-1">
+        <a href="quanguo.html" class="mobile-nav-link ">首页</a>
+        <a href="bingfa.html" class="mobile-nav-link bingfa-link">并发症状</a>
+        <a href="trend.html" class="mobile-nav-link">趋势分析</a>
+        <a href="prevention.html" class="mobile-nav-link active">预防措施</a>
+        <a href="risk.html" class="mobile-nav-link">风险评估</a>
+      </div>
+    </div>
+  </nav>
+<head>
+  <!-- 配置Tailwind自定义颜色 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            accent: '#10b981',
+            secondary: '#f97316',
+            neutral: '#64748b'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+  <!-- 主要内容 -->
+  <main class="main">
+    <!-- 预防措施统计概览 -->
+    <section class="stats">
+      <div class="container mx-auto px-4">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num">34.2%</div>
+            <div class="stat-text">中国成年人糖尿病患病率</div>
+            <div class="stat-source">2023年数据</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">58%</div>
+            <div class="stat-text">生活方式干预可降低风险</div>
+            <div class="stat-source">WHO研究数据</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">2.3亿</div>
+            <div class="stat-text">中国糖尿病前期人群</div>
+            <div class="stat-source">2023年数据</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">80%</div>
+            <div class="stat-text">2型糖尿病可预防</div>
+            <div class="stat-source">国际糖尿病联盟</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 主要预防措施 -->
+    <section class="measures">
+      <div class="container mx-auto px-4">
+        <div class="section-header">
+          <h2 class="section-title">关键预防措施</h2>
+          <p class="section-desc">科学研究证实的有效预防方法</p>
+        </div>
+        
+        <div class="measures-grid">
+          <!-- 健康饮食 -->
+          <div class="measure-card">
+            <div class="card-icon">
+              <i class="fa fa-cutlery"></i>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">健康饮食</h3>
+              <p class="card-text">
+                采用低升糖指数（GI）饮食，增加膳食纤维摄入，控制碳水化合物比例。研究表明，健康饮食可降低30-40%的糖尿病风险。
+              </p>
+              <div class="card-tips">
+                <h4 class="tips-title">具体建议：</h4>
+                <ul class="tips-list">
+                  <li><i class="fa fa-check"></i> 蔬菜占饮食的30-40%</li>
+                  <li><i class="fa fa-check"></i> 选择全谷物而非精制碳水</li>
+                  <li><i class="fa fa-check"></i> 控制红肉摄入，优先选择鱼类和豆类</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 规律运动 -->
+          <div class="measure-card">
+            <div class="card-icon">
+              <i class="fa fa-heartbeat"></i>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">规律运动</h3>
+              <p class="card-text">
+                每周进行至少150分钟的中等强度有氧运动，如快走、游泳或骑自行车。运动可提高胰岛素敏感性，降低27-38%的糖尿病风险。
+              </p>
+              <div class="card-tips">
+                <h4 class="tips-title">具体建议：</h4>
+                <ul class="tips-list">
+                  <li><i class="fa fa-check"></i> 每周5天，每天30分钟中等强度运动</li>
+                  <li><i class="fa fa-check"></i> 包括力量训练，增强肌肉量</li>
+                  <li><i class="fa fa-check"></i> 减少久坐时间，每小时起身活动</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 保持健康体重 -->
+          <div class="measure-card">
+            <div class="card-icon">
+              <i class="fa fa-balance-scale"></i>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">保持健康体重</h3>
+              <p class="card-text">
+                超重或肥胖是糖尿病的主要风险因素。减重5-10%可显著降低糖尿病风险，尤其是减少腹部脂肪。
+              </p>
+              <div class="card-tips">
+                <h4 class="tips-title">具体建议：</h4>
+                <ul class="tips-list">
+                  <li><i class="fa fa-check"></i> 保持BMI在18.5-24.9之间</li>
+                  <li><i class="fa fa-check"></i> 腰围男性&lt;90cm，女性&lt;85cm</li>
+                  <li><i class="fa fa-check"></i> 均衡饮食与运动结合，逐步减重</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 定期体检 -->
+          <div class="measure-card">
+            <div class="card-icon">
+              <i class="fa fa-stethoscope"></i>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">定期体检</h3>
+              <p class="card-text">
+                定期检测血糖水平，特别是有家族病史或其他风险因素的人群。早期发现糖尿病前期可通过干预避免发展为糖尿病。
+              </p>
+              <div class="card-tips">
+                <h4 class="tips-title">具体建议：</h4>
+                <ul class="tips-list">
+                  <li><i class="fa fa-check"></i> 40岁以上每年检查空腹血糖</li>
+                  <li><i class="fa fa-check"></i> 有风险因素者定期检查糖化血红蛋白</li>
+                  <li><i class="fa fa-check"></i> 了解自己的家族病史和风险因素</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 戒烟限酒 -->
+          <div class="measure-card">
+            <div class="card-icon">
+              <i class="fa fa-ban"></i>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">戒烟限酒</h3>
+              <p class="card-text">
+                吸烟和过量饮酒会增加糖尿病风险。戒烟和适量饮酒可以改善整体健康状况，降低20-30%的糖尿病风险。
+              </p>
+              <div class="card-tips">
+                <h4 class="tips-title">具体建议：</h4>
+                <ul class="tips-list">
+                  <li><i class="fa fa-check"></i> 立即戒烟，寻求专业帮助</li>
+                  <li><i class="fa fa-check"></i> 男性每日饮酒不超过25g酒精</li>
+                  <li><i class="fa fa-check"></i> 女性每日饮酒不超过15g酒精</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 管理压力 -->
+          <div class="measure-card">
+            <div class="card-icon">
+              <i class="fa fa-leaf"></i>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">管理压力</h3>
+              <p class="card-text">
+                长期高压力会影响血糖控制。通过冥想、瑜伽、深呼吸等放松技巧可以帮助降低压力水平，改善血糖控制。
+              </p>
+              <div class="card-tips">
+                <h4 class="tips-title">具体建议：</h4>
+                <ul class="tips-list">
+                  <li><i class="fa fa-check"></i> 每天进行10-15分钟冥想或深呼吸</li>
+                  <li><i class="fa fa-check"></i> 保持充足睡眠，每晚7-8小时</li>
+                  <li><i class="fa fa-check"></i> 培养爱好，保持社交活动</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 饮食建议比例 -->
+    <section class="diet">
+      <div class="container mx-auto px-4">
+        <div class="section-header">
+          <h2 class="section-title">糖尿病健康饮食方案</h2>
+          <p class="section-desc">科学配比膳食结构，用均衡营养防控血糖</p>
+        </div>
+        
+        <div class="diet-grid">
+          <div class="diet-chart-box">
+            <h3 class="chart-title">饮食营养比例</h3>
+            <div class="chart-container">
+              <canvas id="dietChart"></canvas>
+            </div>
+            <div class="diet-stats">
+              <div class="diet-stat">
+                <div class="stat-label">碳水化合物</div>
+                <div class="stat-value">45-60%</div>
+                <div class="stat-note">选择全谷物</div>
+              </div>
+              <div class="diet-stat">
+                <div class="stat-label">蛋白质</div>
+                <div class="stat-value">15-20%</div>
+                <div class="stat-note">优先植物蛋白</div>
+              </div>
+              <div class="diet-stat">
+                <div class="stat-label">脂肪</div>
+                <div class="stat-value">20-30%</div>
+                <div class="stat-note">健康不饱和脂肪</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="diet-rules">
+            <h3 class="rules-title">糖尿病饮食黄金原则</h3>
+            <div class="rules-list">
+              <div class="rule-item">
+                <div class="rule-icon">
+                  <i class="fa fa-check"></i>
+                </div>
+                <div class="rule-content">
+                  <h4 class="rule-title">低升糖指数（GI）优先</h4>
+                  <p class="rule-text">选择糙米、全麦面包等低GI食物，避免白米饭、白面包等高GI食物，帮助稳定血糖水平。</p>
+                </div>
+              </div>
+              
+              <div class="rule-item">
+                <div class="rule-icon">
+                  <i class="fa fa-check"></i>
+                </div>
+                <div class="rule-content">
+                  <h4 class="rule-title">增加膳食纤维</h4>
+                  <p class="rule-text">每日摄入25-30克膳食纤维，多吃蔬菜、全谷物和豆类，有助于血糖控制和心血管健康。</p>
+                </div>
+              </div>
+              
+              <div class="rule-item">
+                <div class="rule-icon">
+                  <i class="fa fa-check"></i>
+                </div>
+                <div class="rule-content">
+                  <h4 class="rule-title">少食多餐</h4>
+                  <p class="rule-text">每日5-6小餐，避免大量进食导致血糖大幅波动，保持血糖稳定。</p>
+                </div>
+              </div>
+              
+              <div class="rule-item">
+                <div class="rule-icon">
+                  <i class="fa fa-check"></i>
+                </div>
+                <div class="rule-content">
+                  <h4 class="rule-title">隐形糖排查</h4>
+                  <p class="rule-text">警惕酱料、加工食品、饮料中的添加糖，阅读食品标签，选择无糖或低糖产品。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="copyright">
+      © 2025 健康数据可视化. 保留所有权利.
+    </div>
+  </footer>
+
+  <script>
+    // 初始化图表
+    window.addEventListener('load', function() {
+      // 饮食比例图表
+      const dietCtx = document.getElementById('dietChart').getContext('2d');
+      new Chart(dietCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['蔬菜', '全谷物', '蛋白质', '健康脂肪', '水果', '乳制品'],
+          datasets: [{
+            data: [30, 25, 20, 15, 7, 3],
+            backgroundColor: [
+              '#87E8DE', // 蔬菜
+              '#FFE7A0', // 全谷物
+              '#89CFF3', // 蛋白质 
+              '#C3B1E1', // 健康脂肪
+              '#FAA6C3', // 水果
+              '#F9C89F'  // 乳制品
+            ],
+            hoverOffset: 8,
+            borderWidth: 4,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          cutout: '60%',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                usePointStyle: true,
+                pointStyle: 'circle'
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

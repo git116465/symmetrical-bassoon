@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>国际糖尿病患病率分布</title>
+    <!-- 引入外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/npm/echarts/map/js/world.js"></script>
+    
+    <!-- 配置Tailwind自定义颜色 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#94CADB',
+                        secondary: '#AAD6E3',
+                        light: '#C5E1E9',
+                        white: '#FEFEFE'
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .nav-link-active {
+                @apply text-primary border-b-2 border-primary;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 基础样式 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #C5E1E9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* 头部区域 */
+        header {
+            background-color: #94CADB;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 2px solid #AAD6E3;
+        }
+        
+        header h1 {
+            margin: 0;
+            color: #FEFEFE;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .showTime {
+            color: #FEFEFE;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        
+        /* 导航栏样式 */
+        .nav-bar {
+            background-color: #FEFEFE;
+            border-bottom: 1px solid #AAD6E3;
+        }
+        
+        .logo-text {
+            color: #94CADB;
+        }
+        
+        .nav-link {
+            color: #666;
+            text-decoration: none;
+            padding: 5px 0;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover, .mobile-nav-link:hover {
+            color: #94CADB;
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #94CADB;
+        }
+        
+        .mobile-nav-link {
+            display: block;
+            padding: 8px 0;
+            color: #666;
+            text-decoration: none;
+        }
+        
+        .mobile-nav-link.active {
+            color: #94CADB;
+            font-weight: bold;
+        }
+        
+        .nav-toggle {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        /* 主体内容区 */
+        .dashboard {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .chart-column {
+            width: 25%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .map-column {
+            width: 50%;
+        }
+        
+        .panel {
+            background-color: #FEFEFE;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        
+        .panel h2 {
+            font-size: 18px;
+            margin: 0 0 15px 0;
+            color: #94CADB;
+            border-bottom: 1px solid #C5E1E9;
+            padding-bottom: 8px;
+        }
+        
+        .chart {
+            width: 100%;
+            height: 200px;
+            background-color: #f5f5f5;
+            border: 1px solid #AAD6E3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+        }
+        
+        .map {
+            width: 100%;
+            height: 500px;
+            background-color: #FEFEFE;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        
+        #main {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #AAD6E3;
+        }
+        
+        /* 加载动画 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        /* 错误提示样式 */
+        #error {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(2px);
+        }
+        
+        #error-message {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .chart-column, .map-column {
+                width: 100%;
+            }
+            
+            .map {
+                height: 350px !important;
+            }
+            
+            .md:hidden {
+                display: block;
+            }
+            
+            .hidden.md:block {
+                display: none;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .md:hidden {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <h1>国际糖尿病患病率数据可视化</h1>
+        <div class="showTime"></div>
+        <script>
+            // 时钟逻辑
+            var t = null;
+            t = setTimeout(time, 1000); 
+            function time() {
+                clearTimeout(t); 
+                dt = new Date();
+                var y = dt.getFullYear();
+                var mt = dt.getMonth() + 1;
+                var day = dt.getDate();
+                var h = dt.getHours(); 
+                var m = dt.getMinutes(); 
+                var s = dt.getSeconds(); 
+                document.querySelector(".showTime").innerHTML =
+                    "当前时间：" + y + "年" + mt + "月" + day + "-" + h + "时" + m + "分" + s + "秒";
+                t = setTimeout(time, 1000); 
+            }
+        </script>
+    </header>
+
+    <!-- 顶部导航栏 -->
+    <nav class="nav-bar">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo 区域 -->
+                <div class="flex items-center">
+                    <div class="text-xl font-bold logo-text">
+                        <i class="fa fa-heartbeat mr-2"></i>糖尿病数据中心
+                    </div>
+                </div>
+                
+                <!-- 导航菜单 - 桌面版 -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="internation.html" class="nav-link">首页</a>
+                    <a href="#" class="nav-link active">趋势分析</a>
+                    <a href="nation.html" class="nav-link">国家情况</a>
+                </div>
+                
+                <!-- 右侧用户信息和菜单按钮 -->
+                <div class="flex items-center">
+                    <div class="hidden md:block mr-4 text-sm text-gray-600">
+                        <span>管理员</span>
+                        <i class="fa fa-user-circle ml-2"></i>
+                    </div>
+                    
+                    <!-- 移动端菜单按钮 -->
+                    <button class="md:hidden nav-toggle">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 导航菜单 - 移动端 -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-4 py-2 space-y-1">
+                <a href="internation.html" class="mobile-nav-link">首页</a>
+                <a href="#" class="mobile-nav-link active">趋势分析</a>
+                <a href="nation.html" class="mobile-nav-link">国家情况</a>
+            </div>
+        </div>
+    </nav>
+
+  <!-- 导航栏下方添加折线图容器 -->
+<div class="container mx-auto px-4 py-8">
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">糖尿病患病率趋势分析</h2>
+    <div id="prevalence-chart" class="w-full h-[400px] md:h-[500px]"></div>
+
+<script>
+  // 页面加载完成后初始化图表
+  document.addEventListener('DOMContentLoaded', function() {
+    // 准备图表数据（示例数据，可替换为真实数据）
+    const years = [1990,  2015, 2017, 2019, 2022, 2030];
+    const prevalence = [7, 8.4, 8.3, 9.3, 14, 10.2]; // 患病率（%）
+    
+    // 初始化ECharts实例
+    const chart = echarts.init(document.getElementById('prevalence-chart'));
+    
+    // 配置图表选项
+    const option = {
+      title: {
+        text: '国际糖尿病患病率随年份变化趋势',
+        subtext: '数据来源：国际糖尿病联盟',
+        left: 'center',
+        textStyle: {
+          color: '#333',
+          fontWeight: 'bold'
+        },
+        subtextStyle: {
+          color: '#666'
+        }
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderColor: '#ddd',
+        borderWidth: 1,
+        textStyle: { color: '#333' },
+        formatter: function(params) {
+          return params[0].name + '年<br/>' + 
+                 '患病率：' + params[0].value + '%';
+        }
+      },
+      legend: {
+        data: ['糖尿病患病率'],
+        bottom: 10,
+        left: 'center',
+        textStyle: { color: '#555' }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '10%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: years,
+        axisTick: {
+          alignWithLabel: true
+        },
+        axisLine: {
+          lineStyle: {
+            color: '#999'
+          }
+        },
+        axisLabel: {
+          textStyle: { color: '#666' },
+          rotate: 45 // 防止年份标签重叠
+        }
+      },
+      yAxis: {
+        type: 'value',
+        name: '患病率（%）',
+        nameLocation: 'middle',
+        nameGap: 25,
+        axisLine: {
+          lineStyle: {
+            color: '#999'
+          }
+        },
+        axisLabel: {
+          textStyle: { color: '#666' },
+          formatter: function(value) {
+            return value + '%';
+          }
+        },
+        splitLine: {
+          lineStyle: {
+            color: '#eee'
+          }
+        }
+      },
+      series: [{
+        name: '糖尿病患病率',
+        type: 'line',
+        data: prevalence,
+        symbol: 'circle',
+        symbolSize: 8,
+        color: '#165DFF', // 沿用Tailwind配置的主色调
+        lineStyle: {
+          width: 3,
+          color: '#165DFF'
+        },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [{
+              offset: 0,
+              color: 'rgba(22, 93, 255, 0.2)' // 渐变起始色（透明蓝）
+            }, {
+              offset: 1,
+              color: 'rgba(22, 93, 255, 0.05)' // 渐变结束色（更透明）
+            }]
+          }
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowColor: 'rgba(0, 0, 0, 0.3)'
+          }
+        }
+      }]
+    };
+    
+    // 应用配置并渲染图表
+    chart.setOption(option);
+    
+    // 窗口 resize 时自适应图表大小
+    window.addEventListener('resize', function() {
+      chart.resize();
+    });
+  });
+</script>
+
+    
+    <!-- 新增：趋势分析文本框 -->
+    <div class="max-w-3xl mx-auto p-5 bg-gray-50 rounded-lg">
+      <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center justify-center">
+        <i class="fa fa-line-chart text-primary mr-2"></i>趋势分析
+      </h3>
+      <p class="text-gray-700 leading-relaxed" id="trend-analysis">
+        从上述折线图可以看出，1990-2022年间糖尿病患病率呈现持续上升趋势。<br><br>
+
+        2030年数据为国际糖尿病联盟（IDF）的预测数据。<br><br>
+        
+        这种增长可能与人口老龄化、生活方式改变（如高热量饮食、运动量减少）及城市化进程加快等因素相关。值得注意的是，2017年患病率有所下降，可能与社会关注度提升和个人健康关注提升有关。<br><br>
+        
+        未来需持续关注高危人群（如肥胖人群、有家族病史者）的健康管理，并加强糖尿病预防知识普及，以遏制患病率进一步上升趋势。
+      </p>
+    </div>
+  </div>
+</div>

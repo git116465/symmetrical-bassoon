@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>亚洲主要国家糖尿病患病率分布</title>
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#8B5CF6',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                        info: '#06B6D4',
+                        light: '#F3F4F6',
+                        dark: '#1F2937',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            }
+            .chart-container {
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-8">
+                <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-gray-800 mb-3">
+                    亚洲主要国家糖尿病患病率分布
+                </h1>
+                <p class="text-gray-600 text-lg">
+                    <i class="fa fa-info-circle text-primary"></i> 数据基于2023年国际糖尿病联盟（IDF）报告
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 card-shadow mb-8">
+                <div class="chart-container" id="diabetesChart"></div>
+            </div>
+            
+            
+            <div class="bg-white rounded-xl p-6 card-shadow">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa fa-table text-accent mr-2"></i> 详细数据
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">国家</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">糖尿病患病率(%)</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">患病人数(百万)</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">全球排名</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-red-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">中国</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">11.9%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">140.9</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-orange-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">印度</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10.1%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">101.3</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-blue-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">日本</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">7.3%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">12.5</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">7</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-purple-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">韩国</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5.4%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3.4</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">18</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">印度尼西亚</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3.8%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10.7</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">9</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-xl font-semibold mb-2">亚洲糖尿病研究</h3>
+                    <p class="text-gray-400 text-sm">
+                        数据来源：国际糖尿病联盟（IDF）2023年报告
+                    </p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-medkit text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-heartbeat text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-stethoscope text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400 text-sm">
+                <p>© 2023 健康数据可视化项目 | 本网站仅供演示，非医疗建议</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 初始化图表
+        const chartDom = document.getElementById('diabetesChart');
+        const myChart = echarts.init(chartDom);
+        
+        // 图表配置
+        const option = {
+            title: {
+                text: '亚洲主要国家糖尿病患病率分布',
+                subtext: '20-79岁人群（2023年数据）',
+                left: 'center',
+                textStyle: {
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    color: '#333'
+                },
+                subtextStyle: {
+                    color: '#666'
+                }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}: {c}%<br/>占比: {d}%',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                borderColor: '#ddd',
+                borderWidth: 1,
+                textStyle: {
+                    color: '#333'
+                }
+            },
+            legend: {
+                type: 'scroll',
+                orient: 'vertical',
+                right: 10,
+                top: 20,
+                bottom: 20,
+                data: ['中国', '印度', '日本', '韩国', '印度尼西亚', '巴基斯坦', '孟加拉国'],
+                textStyle: {
+                    color: '#666',
+                    fontSize: 12
+                },
+                pageButtonItemGap: 5,
+                pageButtonStyle: {
+                    color: '#999'
+                }
+            },
+            series: [
+                {
+                    name: '糖尿病患病率',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['40%', '50%'],
+                    avoidLabelOverlap: false,
+                    label: {
+                        show: true,
+                        formatter: '{b}: {c}%',
+                        textStyle: {
+                            fontSize: 12,
+                            fontWeight: 'normal'
+                        }
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data: [
+                        {value: 11.9, name: '中国', itemStyle: {color: '#ef4444'}},
+                        {value: 10.1, name: '印度', itemStyle: {color: '#f97316'}},
+                        {value: 7.3, name: '日本', itemStyle: {color: '#3b82f6'}},
+                        {value: 5.4, name: '韩国', itemStyle: {color: '#8b5cf6'}},
+                        {value: 3.8, name: '印度尼西亚', itemStyle: {color: '#10b981'}},
+                        {value: 2.2, name: '巴基斯坦', itemStyle: {color: '#06b6d4'}},
+                        {value: 1.5, name: '孟加拉国', itemStyle: {color: '#eab308'}}
+                    ]
+                }
+            ]
+        };
+        
+        // 使用配置项显示图表
+        myChart.setOption(option);
+        
+        // 响应窗口大小变化
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>
+    

@@ -1,0 +1,340 @@
+.body {
+  font-family: 'Inter', sans-serif;
+  background-color: #FBFADA;
+  color: #374151;
+}
+
+/* 统计卡片样式 */
+.stats {
+  padding: 3rem 0;
+  background-color: #FBFADA;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.stat-card {
+  background-color: rgba(22, 93, 255, 0.05);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:nth-child(2) {
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.stat-card:nth-child(3) {
+  background-color: rgba(249, 115, 22, 0.05);
+}
+
+.stat-card:nth-child(4) {
+  background-color: rgba(100, 116, 139, 0.05);
+}
+
+.stat-num {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #165DFF;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card:nth-child(2) .stat-num {
+  color: #10b981;
+}
+
+.stat-card:nth-child(3) .stat-num {
+  color: #f97316;
+}
+
+.stat-card:nth-child(4) .stat-num {
+  color: #64748b;
+}
+
+.stat-text {
+  color: #4b5563;
+  margin-bottom: 1rem;
+}
+
+.stat-source {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* 预防措施卡片样式 */
+.measures {
+  padding: 3rem 0;
+  background-color: #e4f3b9;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.section-desc {
+  color: #6b7280;
+}
+
+.measures-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .measures-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .measures-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.measure-card {
+  background-color:#f2f4d1;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.measure-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+  height: 10rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+
+.card-icon i {
+  color: #165DFF;
+}
+
+.measure-card:nth-child(2) .card-icon i {
+  color: #10b981;
+}
+
+.measure-card:nth-child(3) .card-icon i {
+  color: #f97316;
+}
+
+.measure-card:nth-child(4) .card-icon i {
+  color: #165DFF;
+}
+
+.measure-card:nth-child(5) .card-icon i {
+  color: #10b981;
+}
+
+.measure-card:nth-child(6) .card-icon i {
+  color: #f97316;
+}
+
+.card-content {
+  padding: 1.25rem;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+}
+
+.card-text {
+  color: #4b5563;
+  margin-bottom: 1rem;
+}
+
+.tips-title {
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.tips-list {
+  color: #4b5563;
+}
+
+.tips-list li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.tips-list li i {
+  color: #10b981;
+  margin-right: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+/* 饮食建议样式 */
+.diet {
+  padding: 3rem 0;
+  background-color:#d6e9b9;
+}
+
+.diet-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .diet-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.diet-chart-box {
+  background-color: #e6e5c2;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+.chart-container {
+  height: 20rem;
+}
+
+.diet-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.diet-stat {
+  background-color: #FBFADA;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.stat-value {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #165DFF;
+  margin: 0.25rem 0;
+}
+
+.stat-note {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.rules-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rule-item {
+  display: flex;
+}
+
+.rule-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #165DFF;
+  background-color: rgba(22, 93, 255, 0.1);
+}
+
+.rule-item:nth-child(2) .rule-icon {
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.rule-item:nth-child(3) .rule-icon {
+  color: #f97316;
+  background-color: rgba(249, 115, 22, 0.1);
+}
+
+.rule-item:nth-child(4) .rule-icon {
+  color: #64748b;
+  background-color: rgba(100, 116, 139, 0.1);
+}
+
+.rule-content {
+  margin-left: 1rem;
+}
+
+.rule-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.rule-text {
+  color: #4b5563;
+  margin-top: 0.25rem;
+}
+
+/* 页脚样式 */
+.footer {
+  background-color:#12372A;
+  color: white;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.copyright {
+  color: #9ca3af;
+  font-size: 0.875rem;
+}

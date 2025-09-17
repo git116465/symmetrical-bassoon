@@ -1,0 +1,146 @@
+/* 基础样式重置与全局设置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #fefdc9;
+  line-height: 1.6;
+}
+
+/* 容器与布局 */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+/* 标题样式 */
+h1, h2, h3, h4 {
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  text-align: center;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+
+/* 导航栏样式 */
+.navbar {
+  background-color: #12372A;
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.navbar a {
+  color: inherit;
+  text-decoration: none;
+  padding: 0.5rem 0;
+  transition: color 0.2s ease-in-out;
+}
+
+.navbar a:hover:not(.active) {
+  color: #165DFF;
+}
+
+.navbar a.active {
+  color: #165DFF;
+  font-weight: 500;
+  position: relative;
+}
+
+.navbar a.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #165DFF;
+}
+
+/* 卡片与面板样式 */
+.card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 图表容器样式 */
+.chart-container {
+  width: 100%;
+  height: 400px;
+  position: relative;
+}
+
+/* 列表样式 */
+ul {
+  list-style: none;
+}
+
+li {
+  position: relative;
+  padding-left: 2.5rem;
+}
+
+/* 进度条样式 */
+.progress-bar {
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 按钮与交互元素 */
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+a {
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+/* 页脚样式 */
+footer {
+  background-color: #253858;
+  color: white;
+}
+
+footer a {
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+footer a:hover {
+  color: #165DFF;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .chart-container {
+    height: 300px;
+  }
+}

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>糖尿病风险评估</title>
+  <link rel="stylesheet" href="quanguo.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <!-- 配置Tailwind自定义颜色 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            accent: '#10b981',
+            secondary: '#f97316',
+            neutral: '#64748b'
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style type="text/css">
+    /* 风险评估表单样式 */
+    .risk-form .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .risk-form label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .risk-form select, .risk-form input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background-color: #fff;
+    }
+    
+    .risk-result-card {
+      transition: all 0.3s ease;
+    }
+    
+    .risk-result-card.high-risk {
+      border-color: #ef4444;
+    }
+    
+    .risk-result-card.medium-risk {
+      border-color: #f97316;
+    }
+    
+    .risk-result-card.low-risk {
+      border-color: #10b981;
+    }
+
+    /* 新增统计数据样式 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 0.75rem;
+      border-radius: 6px;
+      background-color: #f8fafc;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+    
+    .chart-note {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: #f1f5f9;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      color: #334155;
+    }
+
+    /* 加载动画 */
+    .loader {
+      border: 3px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 3px solid #3498db;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-left: 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+      color: #ef4444;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #fef2f2;
+      border-radius: 6px;
+      border: 1px solid #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <!-- 头部区域 -->
+  <header>
+    <h1>糖尿病数据可视化平台</h1>
+    <div class="showTime"></div>
+    <!-- 移除用户信息和退出按钮 -->
+  </header>
+
+  <!-- 顶部导航栏 -->
+  <nav class="nav-bar">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center">
+          <div class="text-xl font-bold logo-text"><i class="fa fa-heartbeat mr-2"></i>糖尿病数据中心</div>
+        </div>
+        <div class="hidden md:flex space-x-8">
+          <a href="quanguo.html" class="nav-link">首页</a>
+          <a href="bingfa.html" class="nav-link bingfa-link">并发症状</a>
+          <a href="trend.html" class="nav-link trend-link">趋势分析</a>
+          <a href="prevention.html" class="nav-link prevention-link">预防措施</a>
+          <a href="risk.html" class="nav-link active">风险评估</a>
+          <!-- 移除登录链接 -->
+        </div>
+        <div class="flex items-center">
+          <!-- 移除认证状态显示 -->
+          <button class="md:hidden nav-toggle"><i class="fa fa-bars"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="md:hidden hidden" id="mobile-menu">
+      <div class="px-4 py-2 space-y-1">
+        <a href="quanguo.html" class="mobile-nav-link">首页</a>
+        <a href="bingfa.html" class="mobile-nav-link bingfa-link">并发症状</a>
+        <a href="trend.html" class="mobile-nav-link">趋势分析</a>
+        <a href="prevention.html" class="mobile-nav-link">预防措施</a>
+        <a href="risk.html" class="mobile-nav-link active">风险评估</a>
+        <!-- 移除登录链接 -->
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主要内容 -->
+  <main class="main container mx-auto px-4 py-8">
+    <section class="mb-10">
+      <div class="section-header text-center mb-8">
+        <h2 class="section-title text-3xl font-bold text-gray-800">糖尿病风险评估</h2>
+        <p class="section-desc text-gray-600 mt-2">通过以下问题评估您的糖尿病患病风险，只需2分钟</p>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <!-- 评估表单 -->
+        <div class="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 card">
+          <h3 class="text-xl font-semibold mb-6 flex items-center">
+            <i class="fa fa-question-circle text-primary mr-2"></i>
+            请回答以下问题
+          </h3>
+          
+          <form id="risk-assessment-form" class="risk-form">
+            <div class="form-group">
+              <label for="age">1. 您的年龄是？</label>
+              <select id="age" required>
+                <option value="">请选择</option>
+                <option value="20-39">20-39岁</option>
+                <option value="40-49">40-49岁</option>
+                <option value="50-59">50-59岁</option>
+                <option value="60-69">60-69岁</option>
+                <option value="70+">70岁以上</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="bmi">2. 您的体重指数(BMI)属于哪个范围？</label>
+              <select id="bmi" required>
+                <option value="">请选择</option>
+                <option value="underweight">&lt;18.5 (偏瘦)</option>
+                <option value="normal">18.5-24.9 (正常)</option>
+                <option value="overweight">25.0-29.9 (超重)</option>
+                <option value="obese">&gt;=30 (肥胖)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="waist">3. 您的腰围是？</label>
+              <select id="waist" required>
+                <option value="">请选择</option>
+                <option value="normal-male">男性&lt;90cm / 女性&lt;85cm (正常)</option>
+                <option value="abnormal-male">男性&gt;=90cm / 女性&gt;=85cm (超标)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="family-history">4. 您的直系亲属(父母、兄弟姐妹或子女)中有糖尿病患者吗？</label>
+              <select id="family-history" required>
+                <option value="">请选择</option>
+                <option value="no">没有</option>
+                <option value="yes">有</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="physical-activity">5. 您每周进行中等强度运动的频率是？</label>
+              <select id="physical-activity" required>
+                <option value="">请选择</option>
+                <option value="regular">每周至少3次，每次30分钟以上</option>
+                <option value="irregular">每周1-2次</option>
+                <option value="sedentary">很少或几乎不运动</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="blood-pressure">6. 您有高血压吗？(血压≥140/90 mmHg)</label>
+              <select id="blood-pressure" required>
+                <option value="">请选择</option>
+                <option value="no">没有</option>
+                <option value="yes">有，或正在服用降压药</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="glucose">7. 您曾被诊断为空腹血糖偏高或糖耐量异常吗？</label>
+              <select id="glucose" required>
+                <option value="">请选择</option>
+                <option value="no">没有</option>
+                <option value="yes">有</option>
+              </select>
+            </div>
+            
+            <div class="text-center">
+              <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium" id="submit-btn">
+                计算风险
+              </button>
+              <div id="loading" class="loader hidden"></div>
+            </div>
+            <div id="error-message" class="error-message hidden"></div>
+          </form>
+        </div>
+        
+        <!-- 评估结果 -->
+        <div class="lg:col-span-2">
+          <div id="result-container" class="hidden bg-white rounded-xl shadow-lg p-6 card risk-result-card">
+            <h3 class="text-xl font-semibold mb-4 flex items-center">
+              <i class="fa fa-bar-chart text-accent mr-2"></i>
+              您的糖尿病风险评估结果
+            </h3>
+            
+            <div class="mb-6">
+              <div class="flex justify-between mb-2">
+                <span class="font-medium">总体风险水平</span>
+                <span id="risk-level" class="font-medium text-accent">待评估</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-3">
+                <div id="risk-bar" class="bg-accent h-3 rounded-full progress-bar" style="width: 0%"></div>
+              </div>
+            </div>
+            
+            <div id="risk-analysis" class="mb-6">
+              <h4 class="font-semibold mb-2 text-gray-800">风险分析：</h4>
+              <p class="text-gray-700">请完成评估以获取您的个性化风险分析</p>
+            </div>
+            
+            <div id="risk-suggestions">
+              <h4 class="font-semibold mb-2 text-gray-800">建议措施：</h4>
+              <ul class="space-y-2 text-gray-700">
+                <li class="flex items-start">
+                  <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+                  <span>完成评估以获取个性化建议</span>
+                </li>
+              </ul>
+            </div>
+
+            <div id="risk-factors" class="mt-4 hidden">
+              <h4 class="font-semibold mb-2 text-gray-800">风险因素分析：</h4>
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div class="flex justify-between">
+                  <span>年龄:</span>
+                  <span id="factor-age" class="font-medium">0分</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>BMI:</span>
+                  <span id="factor-bmi" class="font-medium">0分</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>腰围:</span>
+                  <span id="factor-waist" class="font-medium">0分</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>家族病史:</span>
+                  <span id="factor-family" class="font-medium">0分</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>运动频率:</span>
+                  <span id="factor-activity" class="font-medium">0分</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>血压:</span>
+                  <span id="factor-pressure" class="font-medium">0分</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>血糖历史:</span>
+                  <span id="factor-glucose" class="font-medium">0分</span>
+                </div>
+                <div class="flex justify-between border-t pt-1 mt-1 col-span-2">
+                  <span class="font-medium">总分:</span>
+                  <span id="factor-total" class="font-bold">0分</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 风险评估图表及新增内容 -->
+          <div class="bg-white rounded-xl shadow-lg p-6 card mt-6">
+            <h3 class="text-xl font-semibold mb-4 flex items-center">
+              <i class="fa fa-pie-chart text-primary mr-2"></i>
+              不同人群患病风险分布
+            </h3>
+            <div id="risk-distribution-chart" class="w-full h-[250px]"></div>
+            
+            <!-- 新增统计数据 -->
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value text-red-500">15%</div>
+                <div class="stat-label">高风险人群</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value text-secondary">30%</div>
+                <div class="stat-label">中风险人群</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value text-accent">55%</div>
+                <div class="stat-label">低风险人群</div>
+              </div>
+            </div>
+            
+            <!-- 新增说明文字 -->
+            <div class="chart-note">
+              <p><i class="fa fa-info-circle text-primary mr-1"></i> 数据来源：全国糖尿病流行病学调查(2023)，覆盖全国31个省市自治区共12万调查对象。</p>
+              <p class="mt-1"><i class="fa fa-lightbulb text-secondary mr-1"></i> 高风险人群中，83%存在至少3项可改变的风险因素，通过生活方式干预可降低58%的发病风险。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 风险因素说明 -->
+    <section>
+      <div class="bg-white rounded-xl shadow-lg p-6 card">
+        <h3 class="text-xl font-semibold mb-4 flex items-center">
+          <i class="fa fa-info-circle text-secondary mr-2"></i>
+          糖尿病主要风险因素
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="risk-factor">
+            <h4 class="font-medium text-primary mb-2">不可改变的风险因素</h4>
+            <ul class="space-y-2 text-gray-700">
+              <li class="flex items-start">
+                <i class="fa fa-circle text-xs text-neutral mt-1.5 mr-2"></i>
+                <span>年龄增长（40岁以上风险显著增加）</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa fa-circle text-xs text-neutral mt-1.5 mr-2"></i>
+                <span>家族糖尿病史</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa fa-circle text-xs text-neutral mt-1.5 mr-2"></i>
+                <span>种族（某些族群风险较高）</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa fa-circle text-xs text-neutral mt-1.5 mr-2"></i>
+                <span>妊娠糖尿病史或巨大儿分娩史</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="risk-factor">
+            <h4 class="font-medium text-primary mb-2">可改变的风险因素</h4>
+            <ul class="space-y-2 text-gray-700">
+              <li class="flex items-start">
+                <i class="fa fa-circle text-xs text-neutral mt-1.5 mr-2"></i>
+                <span>超重或肥胖，尤其是腹部肥胖</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa fa-circle text-xs text-neutral mt-1.5 mr-2"></i>
+                <span>缺乏体力活动</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa fa-circle text-xs text-neutral mt-1.5 mr-2"></i>
+                <span>不健康的饮食习惯</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa fa-circle text-xs text-neutral mt-1.5 mr-2"></i>
+                <span>高血压、高血脂</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa fa-circle text-xs text-neutral mt-1.5 mr-2"></i>
+                <span>吸烟和过量饮酒</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // API基础URL
+    const API_BASE_URL = 'http://10.55.38.134:5000';
+    
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化风险分布图表
+      initRiskDistributionChart();
+      
+      // 表单提交事件
+      document.getElementById('risk-assessment-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        calculateRisk();
+      });
+      
+      // 移动端菜单切换
+      document.querySelector('.nav-toggle').addEventListener('click', function() {
+        document.getElementById('mobile-menu').classList.toggle('hidden');
+      });
+    });
+    
+    // 初始化风险分布图表
+    function initRiskDistributionChart() {
+      const chart = echarts.init(document.getElementById('risk-distribution-chart'));
+      
+      const option = {
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c}%'
+        },
+        legend: {
+          orient: 'horizontal',
+          bottom: 0,
+          textStyle: {
+            fontSize: 12
+          }
+        },
+        series: [
+          {
+            name: '风险等级',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderRadius: 6,
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            label: {
+              show: false,
+              position: 'center'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            labelLine: {
+              show: false
+            },
+            data: [
+              { value: 15, name: '高风险', itemStyle: { color: '#ef4444' } },
+              { value: 30, name: '中风险', itemStyle: { color: '#f97316' } },
+              { value: 55, name: '低风险', itemStyle: { color: '#10b981' } }
+            ]
+          }
+        ]
+      };
+      
+      chart.setOption(option);
+      
+      // 响应窗口大小变化
+      window.addEventListener('resize', function() {
+        chart.resize();
+      });
+    }
+    
+    // 发送普通请求（不进行身份验证）
+    async function sendRequest(url, options = {}) {
+      // 设置默认headers
+      const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers
+      };
+      
+      // 发送请求
+      const response = await fetch(url, {
+        ...options,
+        headers
+      });
+      
+      return response;
+    }
+    
+    // 计算糖尿病风险 - 调用后端API（无需登录）
+    async function calculateRisk() {
+      // 获取表单值
+      const formData = {
+        age_range: document.getElementById('age').value,
+        bmi_category: document.getElementById('bmi').value,
+        waist_status: document.getElementById('waist').value,
+        family_history: document.getElementById('family-history').value,
+        physical_activity: document.getElementById('physical-activity').value,
+        blood_pressure: document.getElementById('blood-pressure').value,
+        glucose_history: document.getElementById('glucose').value
+      };
+      
+      // 验证所有字段都已填写
+      for (const key in formData) {
+        if (!formData[key]) {
+          showError('请填写所有必填字段');
+          return;
+        }
+      }
+      
+      // 隐藏错误信息，显示加载状态
+      hideError();
+      setLoading(true);
+      
+      try {
+        // 发送普通请求，不使用认证
+        const response = await sendRequest(`${API_BASE_URL}/api/risk/assess`, {
+          method: 'POST',
+          body: JSON.stringify(formData)
+        });
+        
+        console.log('API响应状态:', response.status);
+        
+        if (!response.ok) {
+          // 尝试获取错误详情
+          let errorDetail = '';
+          try {
+            const errorData = await response.json();
+            errorDetail = errorData.error || errorData.message || '';
+          } catch (e) {
+            errorDetail = await response.text();
+          }
+          
+          if (response.status === 400) {
+            throw new Error(`请求参数不正确: ${errorDetail}`);
+          } else if (response.status === 405) {
+            throw new Error('服务器不支持POST请求方法，请联系管理员检查API配置');
+          } else if (response.status === 404) {
+            throw new Error('风险评估接口不存在，请检查API地址');
+          } else {
+            throw new Error(`服务器错误: ${response.status} - ${errorDetail}`);
+          }
+        }
+        
+        const result = await response.json();
+        console.log('API返回结果:', result);
+        
+        // 使用API返回的结果更新UI
+        updateRiskResultUI(result);
+        
+      } catch (error) {
+        console.error('API调用失败:', error);
+        showError(`评估失败: ${error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    // 使用API返回的数据更新UI
+    function updateRiskResultUI(result) {
+      const riskPercentage = result.risk_percentage;
+      const riskLevel = result.risk_level;
+      const riskScore = result.risk_score;
+      
+      // 确定风险等级对应的颜色
+      let riskColor;
+      if (riskLevel === '高风险') {
+        riskColor = 'text-red-500';
+      } else if (riskLevel === '中风险') {
+        riskColor = 'text-secondary';
+      } else {
+        riskColor = 'text-primary';
+      }
+      
+      // 显示结果容器
+      document.getElementById('result-container').classList.remove('hidden');
+      
+      // 更新风险等级和进度条
+      document.getElementById('risk-level').className = `font-medium ${riskColor}`;
+      document.getElementById('risk-bar').className = `h-3 rounded-full progress-bar ${riskColor}`;
+      document.getElementById('risk-bar').style.width = `${riskPercentage}%`;
+      document.getElementById('risk-level').textContent = `${riskLevel} (${riskPercentage}%)`;
+      
+      // 更新风险分析
+      document.getElementById('risk-analysis').innerHTML = `
+        <h4 class="font-semibold mb-2 text-gray-800">风险分析：</h4>
+        <p class="text-gray-700">${result.analysis || '请咨询医生获取详细分析'}</p>
+      `;
+      
+      // 更新建议措施
+      let suggestionsList = '';
+      if (result.suggestions && Array.isArray(result.suggestions)) {
+        suggestionsList = result.suggestions.map(suggestion => `
+          <li class="flex items-start">
+            <i class="fa fa-check-circle ${riskColor} mt-1 mr-2"></i>
+            <span>${suggestion}</span>
+          </li>
+        `).join('');
+      }
+      
+      document.getElementById('risk-suggestions').innerHTML = `
+        <h4 class="font-semibold mb-2 text-gray-800">建议措施：</h4>
+        <ul class="space-y-2 text-gray-700">
+          ${suggestionsList || `
+          <li class="flex items-start">
+            <i class="fa fa-check-circle ${riskColor} mt-1 mr-2"></i>
+            <span>完成评估以获取个性化建议</span>
+          </li>
+          `}
+        </ul>
+      `;
+      
+      // 更新风险因素分析
+      if (result.factors) {
+        document.getElementById('risk-factors').classList.remove('hidden');
+        document.getElementById('factor-age').textContent = `${result.factors.age || 0}分`;
+        document.getElementById('factor-bmi').textContent = `${result.factors.bmi || 0}分`;
+        document.getElementById('factor-waist').textContent = `${result.factors.waist || 0}分`;
+        document.getElementById('factor-family').textContent = `${result.factors.family_history || 0}分`;
+        document.getElementById('factor-activity').textContent = `${result.factors.physical_activity || 0}分`;
+        document.getElementById('factor-pressure').textContent = `${result.factors.blood_pressure || 0}分`;
+        document.getElementById('factor-glucose').textContent = `${result.factors.glucose_history || 0}分`;
+        document.getElementById('factor-total').textContent = `${riskScore}分`;
+      }
+      
+      // 根据风险等级添加边框颜色
+      const resultCard = document.querySelector('.risk-result-card');
+      resultCard.classList.remove('high-risk', 'medium-risk', 'low-risk');
+      
+      if (riskLevel === '高风险') {
+        resultCard.classList.add('high-risk');
+      } else if (riskLevel === '中风险') {
+        resultCard.classList.add('medium-risk');
+      } else {
+        resultCard.classList.add('low-risk');
+      }
+    }
+    
+    // 显示错误信息
+    function showError(message) {
+      const errorElement = document.getElementById('error-message');
+      errorElement.textContent = message;
+      errorElement.classList.remove('hidden');
+    }
+    
+    // 隐藏错误信息
+    function hideError() {
+      document.getElementById('error-message').classList.add('hidden');
+    }
+    
+    // 设置加载状态
+    function setLoading(isLoading) {
+      const submitBtn = document.getElementById('submit-btn');
+      const loadingElement = document.getElementById('loading');
+      
+      if (isLoading) {
+        submitBtn.disabled = true;
+        loadingElement.classList.remove('hidden');
+      } else {
+        submitBtn.disabled = false;
+        loadingElement.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

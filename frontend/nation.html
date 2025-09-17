@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>国际糖尿病患病率分布</title>
+    <!-- 引入外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/npm/echarts/map/js/world.js"></script>
+    
+    <!-- 配置Tailwind自定义颜色 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#94CADB',
+                        secondary: '#AAD6E3',
+                        light: '#C5E1E9',
+                        white: '#FEFEFE'
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+
+            .nav-link-active {
+                @apply text-primary border-b-2 border-primary;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 基础样式 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #C5E1E9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* 头部区域 */
+        header {
+            background-color: #94CADB;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 2px solid #AAD6E3;
+        }
+        
+        header h1 {
+            margin: 0;
+            color: #FEFEFE;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .showTime {
+            color: #FEFEFE;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        
+        /* 导航栏样式 */
+        .nav-bar {
+            background-color: #FEFEFE;
+            border-bottom: 1px solid #AAD6E3;
+        }
+        
+        .logo-text {
+            color: #94CADB;
+        }
+        
+        .nav-link {
+            color: #666;
+            text-decoration: none;
+            padding: 5px 0;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover, .mobile-nav-link:hover {
+            color: #94CADB;
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #94CADB;
+        }
+        
+        .mobile-nav-link {
+            display: block;
+            padding: 8px 0;
+            color: #666;
+            text-decoration: none;
+        }
+        
+        .mobile-nav-link.active {
+            color: #94CADB;
+            font-weight: bold;
+        }
+        
+        .nav-toggle {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        /* 主体内容区 */
+        .dashboard {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .chart-column {
+            width: 25%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .map-column {
+            width: 50%;
+        }
+        
+        .panel {
+            background-color: #FEFEFE;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        
+        .panel h2 {
+            font-size: 18px;
+            margin: 0 0 15px 0;
+            color: #94CADB;
+            border-bottom: 1px solid #C5E1E9;
+            padding-bottom: 8px;
+        }
+        
+        .chart {
+            width: 100%;
+            height: 200px;
+            background-color: #f5f5f5;
+            border: 1px solid #AAD6E3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+        }
+        
+        .map {
+            width: 100%;
+            height: 500px;
+            background-color: #FEFEFE;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        
+        #main {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #AAD6E3;
+        }
+        
+        /* 加载动画 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        /* 错误提示样式 */
+        #error {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(2px);
+        }
+        
+        #error-message {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .chart-column, .map-column {
+                width: 100%;
+            }
+            
+            .map {
+                height: 350px !important;
+            }
+            
+            .md:hidden {
+                display: block;
+            }
+            
+            .hidden.md:block {
+                display: none;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .md:hidden {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <h1>国际糖尿病患病率数据可视化</h1>
+        <div class="showTime"></div>
+        <script>
+            // 时钟逻辑
+            var t = null;
+            t = setTimeout(time, 1000); 
+            function time() {
+                clearTimeout(t); 
+                dt = new Date();
+                var y = dt.getFullYear();
+                var mt = dt.getMonth() + 1;
+                var day = dt.getDate();
+                var h = dt.getHours(); 
+                var m = dt.getMinutes(); 
+                var s = dt.getSeconds(); 
+                document.querySelector(".showTime").innerHTML =
+                    "当前时间：" + y + "年" + mt + "月" + day + "-" + h + "时" + m + "分" + s + "秒";
+                t = setTimeout(time, 1000); 
+            }
+        </script>
+    </header>
+
+    <!-- 顶部导航栏 -->
+    <nav class="nav-bar">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo 区域 -->
+                <div class="flex items-center">
+                    <div class="text-xl font-bold logo-text">
+                        <i class="fa fa-heartbeat mr-2"></i>糖尿病数据中心
+                    </div>
+                </div>
+                
+                <!-- 导航菜单 - 桌面版 -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="internation.html" class="nav-link">首页</a>
+                    <a href="inter-trend.html" class="nav-link">趋势分析</a>
+                    <a href="#" class="nav-link active">国家情况</a>
+                </div>
+                
+                <!-- 右侧用户信息和菜单按钮 -->
+                <div class="flex items-center">
+                    <div class="hidden md:block mr-4 text-sm text-gray-600">
+                        <span>管理员</span>
+                        <i class="fa fa-user-circle ml-2"></i>
+                    </div>
+                    
+                    <!-- 移动端菜单按钮 -->
+                    <button class="md:hidden nav-toggle">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 导航菜单 - 移动端 -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-4 py-2 space-y-1">
+                <a href="internation.html" class="mobile-nav-link">首页</a>
+                <a href="inter-trend.html" class="mobile-nav-link">趋势分析</a>
+                <a href="#" class="mobile-nav-link active">国家情况</a>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#8B5CF6',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                        info: '#06B6D4',
+                        light: '#F3F4F6',
+                        dark: '#1F2937',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            }
+            .chart-container {
+                height: 450px;
+            }
+        }
+    </style>
+
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- 亚洲数据说明 -->
+            <div class="text-center mb-8">
+                <p class="text-gray-600 text-lg">
+                    <i class="fa fa-info-circle text-primary"></i> 数据基于2023年国际糖尿病联盟（IDF）报告
+                </p>
+            </div>
+            
+            <!-- 亚洲图表 -->
+            <div class="bg-white rounded-xl p-6 card-shadow mb-8">
+                <div class="chart-container" id="asiaDiabetesChart"></div>
+            </div>
+            
+            <!-- 亚洲详细数据 -->
+            <div class="bg-white rounded-xl p-6 card-shadow mb-12">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa fa-table text-accent mr-2"></i> 亚洲国家详细数据
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">国家</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">糖尿病患病率(%)</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">患病人数(百万)</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">全球排名</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-red-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">中国</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">11.9%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">140.9</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-orange-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">印度</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10.1%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">101.3</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-blue-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">日本</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">7.3%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">12.5</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">7</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-purple-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">韩国</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5.4%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3.4</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">18</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">印度尼西亚</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3.8%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10.7</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">9</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 亚洲糖尿病患病率分析 -->
+            <div class="bg-white rounded-xl p-6 card-shadow mb-12">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa fa-line-chart text-primary mr-2"></i> 亚洲糖尿病患病率分析
+                </h3>
+                <div class="space-y-4 text-gray-700">
+                    <p>
+                        亚洲已成为全球糖尿病负担最重的地区，数据显示中国和印度两国贡献了全球近40%的糖尿病患者，这一现象与多重因素密切相关：
+                    </p>
+                    
+                    <div class="pl-4 no-border-left">
+                        <h4 class="font-medium text-gray-800 mb-2">1. 地域差异显著</h4>
+                        <p>
+                            东亚国家（中国、日本、韩国）因经济发展和生活方式西化，患病率普遍高于东南亚国家。中国11.9%和印度10.1%的患病率远超亚洲平均水平（8.5%），而印度尼西亚3.8%的患病率虽较低，但基于其2.7亿人口基数，实际患病人数仍不容小觑。
+                        </p>
+                    </div>
+                    
+                    <div class="pl-4 no-border-left">
+                        <h4 class="font-medium text-gray-800 mb-2">2. 核心影响因素</h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><span class="font-medium">人口老龄化</span>：日本65岁以上人口占比达30%，是其7.3%患病率的重要原因</li>
+                            <li><span class="font-medium">饮食结构变化</span>：中国城镇居民日均糖分摄入从1990年的20g增至2023年的55g，远超WHO建议标准</li>
+                            <li><span class="font-medium">体力活动减少</span>：亚洲城市居民体力活动量较农村低30%-40%，加剧了代谢问题</li>
+                            <li><span class="font-medium">筛查覆盖率差异</span>：日本、韩国通过全民体检实现70%以上筛查率，而印度筛查率不足30%，导致大量未诊断病例</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="pl-4 no-border-left">
+                        <h4 class="font-medium text-gray-800 mb-2">3. 公共卫生挑战</h4>
+                        <p>
+                            中国每年糖尿病相关医疗支出占全国医疗费用的12%，印度占8%，远超日本（5%）和韩国（6%）。此外，亚洲糖尿病患者并发症（如肾病、失明）发生率较欧美高20%-30%，进一步加重了社会负担。
+                        </p>
+                    </div>
+                    
+                    <div class="pl-4 no-border-left">
+                        <h4 class="font-medium text-gray-800 mb-2">4. 防控趋势</h4>
+                        <p>
+                            各国已采取针对性措施：中国推行"健康中国2030"限制高糖饮料广告，印度对含糖饮料征收20%的"糖税"，日本通过社区运动计划鼓励老年人参与体力活动，这些措施有望逐步缓解糖尿病流行趋势。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 欧洲图表 -->
+            <div class="bg-white rounded-xl p-6 card-shadow mb-8">
+                <div class="chart-container" id="europeDiabetesChart"></div>
+            </div>
+            
+            <!-- 欧洲详细数据 -->
+            <div class="bg-white rounded-xl p-6 card-shadow">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa fa-table text-accent mr-2"></i> 欧洲国家详细数据
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">国家</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">糖尿病患病率(%)</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">患病人数(百万)</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">全球排名</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-yellow-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">俄罗斯</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">8.9%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">13.4</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">6</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-indigo-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">德国</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">7.2%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">6.9</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">12</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-pink-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">英国</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">6.8%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">4.3</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">16</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-teal-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">法国</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">6.1%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3.9</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">17</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-3 w-3 rounded-full bg-rose-500 mr-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">意大利</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5.9%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3.6</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">19</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+    <!-- 欧洲糖尿病患病率分析 -->
+            <div class="bg-white rounded-xl p-6 card-shadow mb-12">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa fa-line-chart text-primary mr-2"></i> 欧洲糖尿病患病率分析
+                </h3>
+                <div class="space-y-4 text-gray-700">
+                    <p>
+                        欧洲作为经济发达、人口老龄化程度较高的地区，其糖尿病患病率呈现出与亚洲截然不同的分布特征和影响因素。
+                    </p>
+                    
+                    <div class="pl-4 no-border-left">
+                        <h4 class="font-medium text-gray-800 mb-2">1. 整体患病率特征</h4>
+                        <p>
+                            患病率属于全球中等偏上水平。欧洲主要国家糖尿病患病率集中在 5.9%-8.9% 之间，整体高于全球平均水平（6.1%），但显著低于亚洲的中国（11.9%）和印度（10.1%）
+                        </p>
+                    </div>
+                    
+                    <div class="pl-4 no-border-left">
+                        <h4 class="font-medium text-gray-800 mb-2">2. 核心影响因素</h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><span class="font-medium">老龄化与人口结构</span>：欧洲是全球老龄化最严重的地区之一，65 岁以上人口占比平均达 20%（德国 22%、意大利 24%），而糖尿病患病率随年龄增长显著上升</li>
+                            <li><span class="font-medium">传统饮食的两面性</span>：地中海饮食（意大利、法国）以橄榄油、鱼类、蔬菜为主，富含不饱和脂肪酸，有助于降低代谢疾病风险，这也是意大利（5.9%）、法国（6.1%）患病率较低的原因之一；而俄罗斯、德国的饮食中红肉、加工肉类占比高，可能加剧胰岛素抵抗</li>
+                            <li><span class="font-medium">饮酒与运动习惯</span>：欧洲人年均酒精摄入量较高（德国 12.6 升 / 人），过量饮酒会损伤胰腺功能；但同时，欧洲国家人均运动时长（每周 3.5 小时）高于亚洲，尤其北欧国家通过完善的步行道、自行车道促进日常活动，一定程度上缓解了患病率上升</li>
+                            <li><span class="font-medium">医疗体系与防控措施</span>：欧洲多数国家拥有全民医保体系，糖尿病筛查覆盖率达 70% 以上</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="pl-4 no-border-left">
+                        <h4 class="font-medium text-gray-800 mb-2">3. 主要挑战</h4>
+                        <p>
+                            移民群体患病率偏高，青少年糖尿病上升
+                        </p>
+                    </div>
+                    
+                    <div class="pl-4 no-border-left">
+                        <h4 class="font-medium text-gray-800 mb-2">4. 应对措施</h4>
+                        <p>
+                            法国对高糖饮料征收 “糖税”，并强制食品包装标注 “营养评分”；俄罗斯推行 “健康饮食指南”，限制学校周边零食销售；德国推广可穿戴设备实时监测血糖，英国通过 AI 算法预测高风险人群，实现精准防控。
+                        </p>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <script>
+        // 初始化亚洲图表
+        const asiaChartDom = document.getElementById('asiaDiabetesChart');
+        const asiaChart = echarts.init(asiaChartDom);
+        
+        const asiaOption = {
+            title: {
+                text: '亚洲主要国家糖尿病患病率分布',
+                subtext: '20-79岁人群（2023年数据）',
+                left: 'center',
+                textStyle: {
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    color: '#333'
+                },
+                subtextStyle: {
+                    color: '#666'
+                }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}: {c}%<br/>占比: {d}%',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                borderColor: '#ddd',
+                borderWidth: 1,
+                textStyle: {
+                    color: '#333'
+                }
+            },
+            legend: {
+                type: 'scroll',
+                orient: 'vertical',
+                right: 10,
+                top: 20,
+                bottom: 20,
+                data: ['中国', '印度', '日本', '韩国', '印度尼西亚'],
+                textStyle: {
+                    color: '#666',
+                    fontSize: 12
+                }
+            },
+            series: [
+                {
+                    name: '糖尿病患病率',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['40%', '50%'],
+                    avoidLabelOverlap: false,
+                    label: {
+                        show: true,
+                        formatter: '{b}: {c}%',
+                        textStyle: {
+                            fontSize: 12
+                        }
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data: [
+                        {value: 11.9, name: '中国', itemStyle: {color: '#ef4444'}},
+                        {value: 10.1, name: '印度', itemStyle: {color: '#f97316'}},
+                        {value: 7.3, name: '日本', itemStyle: {color: '#3b82f6'}},
+                        {value: 5.4, name: '韩国', itemStyle: {color: '#8b5cf6'}},
+                        {value: 3.8, name: '印度尼西亚', itemStyle: {color: '#10b981'}}
+                    ]
+                }
+            ]
+        };
+        
+        asiaChart.setOption(asiaOption);
+        
+        // 初始化欧洲图表
+        const europeChartDom = document.getElementById('europeDiabetesChart');
+        const europeChart = echarts.init(europeChartDom);
+        
+        const europeOption = {
+            title: {
+                text: '欧洲主要国家糖尿病患病率分布',
+                subtext: '20-79岁人群（2023年数据）',
+                left: 'center',
+                textStyle: {
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    color: '#333'
+                },
+                subtextStyle: {
+                    color: '#666'
+                }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}: {c}%<br/>占比: {d}%',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                borderColor: '#ddd',
+                borderWidth: 1,
+                textStyle: {
+                    color: '#333'
+                }
+            },
+            legend: {
+                type: 'scroll',
+                orient: 'vertical',
+                right: 10,
+                top: 20,
+                bottom: 20,
+                data: ['俄罗斯', '德国', '英国', '法国', '意大利'],
+                textStyle: {
+                    color: '#666',
+                    fontSize: 12
+                }
+            },
+            series: [
+                {
+                    name: '糖尿病患病率',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['40%', '50%'],
+                    avoidLabelOverlap: false,
+                    label: {
+                        show: true,
+                        formatter: '{b}: {c}%',
+                        textStyle: {
+                            fontSize: 12
+                        }
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data: [
+                        {value: 8.9, name: '俄罗斯', itemStyle: {color: '#eab308'}},
+                        {value: 7.2, name: '德国', itemStyle: {color: '#6366f1'}},
+                        {value: 6.8, name: '英国', itemStyle: {color: '#ec4899'}},
+                        {value: 6.1, name: '法国', itemStyle: {color: '#14b8a6'}},
+                        {value: 5.9, name: '意大利', itemStyle: {color: '#f43f5e'}}
+                    ]
+                }
+            ]
+        };
+        
+        europeChart.setOption(europeOption);
+        
+        // 响应窗口大小变化
+        window.addEventListener('resize', function() {
+            asiaChart.resize();
+            europeChart.resize();
+        });
+    </script>
+</body>
+</html>

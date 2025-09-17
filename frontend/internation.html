@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>国际糖尿病患病率数据可视化</title>
+    <!-- 引入外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/npm/echarts/map/js/world.js"></script>
+    
+    <!-- 配置Tailwind自定义颜色 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#94CADB',
+                        secondary: '#AAD6E3',
+                        light: '#C5E1E9',
+                        white: '#FEFEFE'
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .nav-link-active {
+                @apply text-primary border-b-2 border-primary;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 基础样式 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #C5E1E9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* 头部区域 */
+        header {
+            background-color: #94CADB;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 2px solid #AAD6E3;
+        }
+        
+        header h1 {
+            margin: 0;
+            color: #FEFEFE;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .showTime {
+            color: #FEFEFE;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        
+        /* 导航栏样式 */
+        .nav-bar {
+            background-color: #FEFEFE;
+            border-bottom: 1px solid #AAD6E3;
+        }
+        
+        .logo-text {
+            color: #94CADB;
+        }
+        
+        .nav-link {
+            color: #666;
+            text-decoration: none;
+            padding: 5px 0;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover, .mobile-nav-link:hover {
+            color: #94CADB;
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #94CADB;
+        }
+        
+        .mobile-nav-link {
+            display: block;
+            padding: 8px 0;
+            color: #666;
+            text-decoration: none;
+        }
+        
+        .mobile-nav-link.active {
+            color: #94CADB;
+            font-weight: bold;
+        }
+        
+        .nav-toggle {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        /* 主体内容区 */
+        .dashboard {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .chart-column {
+            width: 25%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .map-column {
+            width: 50%;
+        }
+        
+        .panel {
+            background-color: #FEFEFE;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        
+        .panel h2 {
+            font-size: 18px;
+            margin: 0 0 15px 0;
+            color: #94CADB;
+            border-bottom: 1px solid #C5E1E9;
+            padding-bottom: 8px;
+        }
+        
+        .chart {
+            width: 100%;
+            height: 200px;
+            background-color: #f5f5f5;
+            border: 1px solid #AAD6E3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+        }
+        
+        .map {
+            width: 100%;
+            height: 500px;
+            background-color: #FEFEFE;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        
+        #main {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #AAD6E3;
+        }
+        
+        /* 加载动画 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        /* 错误提示样式 */
+        #error {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(2px);
+        }
+        
+        #error-message {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .chart-column, .map-column {
+                width: 100%;
+            }
+            
+            .map {
+                height: 350px !important;
+            }
+            
+            .md:hidden {
+                display: block;
+            }
+            
+            .hidden.md:block {
+                display: none;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .md:hidden {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <h1>国际糖尿病患病率数据可视化</h1>
+        <div class="showTime"></div>
+    </header>
+
+    <!-- 顶部导航栏 -->
+    <nav class="nav-bar">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo 区域 -->
+                <div class="flex items-center">
+                    <div class="text-xl font-bold logo-text">
+                        <i class="fa fa-heartbeat mr-2"></i>糖尿病数据中心
+                    </div>
+                </div>
+                
+                <!-- 导航菜单 - 桌面版 -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="#" class="nav-link active">首页</a>
+                    <a href="inter-trend.html" class="nav-link trend-link">趋势分析</a>
+                    <a href="nation.html" class="nav-link">国家情况</a>
+                </div>
+                
+                <!-- 右侧用户信息和菜单按钮 -->
+                <div class="flex items-center">
+                    <div class="hidden md:block mr-4 text-sm text-gray-600">
+                        <span>管理员</span>
+                        <i class="fa fa-user-circle ml-2"></i>
+                        <button class="back-btn px-3 py-1 rounded-md text-sm font-medium mr-2 hidden md:block" 
+        onclick="window.location.href = 'guide.html'">  <!-- 这里修改为具体页面路径 -->
+    <i class="fa fa-arrow-left mr-1"></i>返回
+</button>
+          <button class="md:hidden nav-toggle"><i class="fa fa-bars"></i></button>
+                    </div>
+                    
+                    <!-- 移动端菜单按钮 -->
+                    <button class="md:hidden nav-toggle">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 导航菜单 - 移动端 -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-4 py-2 space-y-1">
+                <a href="#" class="mobile-nav-link active">首页</a>
+                <a href="inter-trend.html" class="mobile-nav-link trend-link">趋势分析</a>
+                <a href="nation.html" class="mobile-nav-link nation-link">国家情况</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主体布局：左右图表 + 中间地图 -->
+    <main class="dashboard">
+        <!-- 左侧图表列 -->
+        <section class="chart-column left">
+            <div class="panel bar">
+                <h2>柱形图-年龄分布</h2>
+                <div class="chart" id="age-chart"></div>
+                <div class="panel-footer"></div>
+            </div>
+            <div class="panel line">
+                <h2>饼形图-性别比例</h2>
+                <div class="chart" id="gender-chart"></div>
+                <div class="panel-footer"></div>
+            </div>
+        </section>
+
+        <!-- 中间地图区域 -->
+        <section class="map-column">
+            <div class="map relative">
+                <!-- 地图容器 -->
+                <div class="w-full h-full" id="main"></div>
+                
+                <!-- 加载状态 -->
+                <div id="loading" class="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3"></div>
+                        <p class="text-gray-600">正在加载地图数据...</p>
+                    </div>
+                </div>
+                
+                <!-- 错误提示 -->
+                <div id="error" class="absolute inset-0 flex items-center justify-center bg-white/90 z-10 hidden">
+                    <div class="text-center p-6 bg-red-50 border border-red-200 rounded-lg">
+                        <i class="fa fa-exclamation-triangle text-red-500 text-3xl mb-3"></i>
+                        <h3 class="text-red-700 font-semibold mb-2">地图加载失败</h3>
+                        <p class="text-red-600 mb-4" id="error-message">请检查网络连接或刷新页面</p>
+                        <button id="retry-btn" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors">
+                            重试
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 右侧图表列 -->
+        <section class="chart-column right">
+            <div class="panel bar2">
+                <h2>折线图-血糖趋势</h2>
+                <div class="chart" id="blood-sugar-chart"></div>
+                <div class="panel-footer"></div>
+            </div>
+            <div class="panel pie2">
+                <h2>饼形图-地理分布</h2>
+                <div class="chart" id="geo-distribution-chart"></div>
+                <div class="panel-footer"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 时钟逻辑
+        var t = null;
+        t = setTimeout(time, 1000); 
+        function time() {
+            clearTimeout(t); 
+            dt = new Date();
+            var y = dt.getFullYear();
+            var mt = dt.getMonth() + 1;
+            var day = dt.getDate();
+            var h = dt.getHours(); 
+            var m = dt.getMinutes(); 
+            var s = dt.getSeconds(); 
+            document.querySelector(".showTime").innerHTML =
+                "当前时间：" + y + "年" + mt + "月" + day + "-" + h + "时" + m + "分" + s + "秒";
+            t = setTimeout(time, 1000); 
+        }
+
+        // 导航栏交互脚本
+        document.addEventListener('DOMContentLoaded', function() {
+            // 定义调试函数
+            function logDebug(message) {
+                console.log('[调试]', message);
+            }
+            
+            const toggle = document.querySelector('.nav-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const loadingIndicator = document.getElementById('loading');
+            const errorIndicator = document.getElementById('error');
+            const errorMessage = document.getElementById('error-message');
+            const retryButton = document.getElementById('retry-btn');
+            
+            // 移动端菜单切换
+            toggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // 导航链接交互
+            const navLinks = document.querySelectorAll('.nav-link, .mobile-nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // 移除所有活动状态
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // 添加当前活动状态
+                    this.classList.add('active');
+                });
+            });
+            
+            // API基础URL - 设置为指定的后端地址
+            const API_BASE_URL = 'http://10.55.38.134:5000';
+            
+            // 初始化图表函数
+            async function initCharts() {
+                try {
+                    // 显示加载状态
+                    loadingIndicator.classList.remove('hidden');
+                    errorIndicator.classList.add('hidden');
+                    
+                    // 初始化地图 - 使用正确的容器ID "main"
+                    const mapChart = echarts.init(document.getElementById('main'));
+                    
+                    // 初始化其他图表
+                    const ageChart = echarts.init(document.getElementById('age-chart'));
+                    const genderChart = echarts.init(document.getElementById('gender-chart'));
+                    const bloodSugarChart = echarts.init(document.getElementById('blood-sugar-chart'));
+                    const geoDistributionChart = echarts.init(document.getElementById('geo-distribution-chart'));
+
+                    // 检查地图数据
+                    const worldMap = echarts.getMap('world');
+                    if (!worldMap || !worldMap.geoJson) {
+                        throw new Error('世界地图数据加载失败，请检查world.js引入');
+                    }
+                    logDebug('世界地图数据加载成功，包含' + worldMap.geoJson.features.length + '个区域');
+
+                    // 数据加载函数
+                    async function loadData() {
+                        try {
+                            // 显示加载状态
+                            loadingIndicator.classList.remove('hidden');
+                            errorIndicator.classList.add('hidden');
+
+                            // 并行加载所有数据
+                            const [continentData, countryData, ageData, genderData, bloodSugarData, geoDistributionData] = await Promise.all([
+                                fetch(`${API_BASE_URL}/api/continents-data`).then(res => res.json()),
+                                fetch(`${API_BASE_URL}/api/countries-data`).then(res => res.json()),
+                                fetch(`${API_BASE_URL}/api/age-distribution`).then(res => res.json()),
+                                fetch(`${API_BASE_URL}/api/gender-ratio`).then(res => res.json()),
+                                fetch(`${API_BASE_URL}/api/blood-sugar-trend`).then(res => res.json()),
+                                fetch(`${API_BASE_URL}/api/geo-distribution`).then(res => res.json())
+                            ]);
+
+                            logDebug('所有数据加载成功');
+                            return {
+                                continentData,
+                                countryData,
+                                ageData,
+                                genderData,
+                                bloodSugarData,
+                                geoDistributionData
+                            };
+                        } catch (error) {
+                            logDebug('数据加载错误: ' + error.message);
+                            errorMessage.textContent = '数据加载失败，请重试';
+                            errorIndicator.classList.remove('hidden');
+                            loadingIndicator.classList.add('hidden');
+                            throw error;
+                        }
+                    }
+
+                    // 加载数据
+                    const { continentData, countryData, ageData, genderData, bloodSugarData, geoDistributionData } = await loadData();
+
+                    // 主地图配置
+                    const mapOption = {
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: params => {
+                                const continent = countryData.find(item => item.name === params.name)?.continent;
+                                return `${continent || '未知'}-${params.name}<br>患病率: ${params.value}%`;
+                            },
+                            backgroundColor: 'rgba(255,255,255,0.9)',
+                            borderColor: '#94CADB',
+                            borderWidth: 1
+                        },
+                        visualMap: {
+                            type: 'piecewise',
+                            pieces: [
+                                { min: 10, label: '≥10%', color: '#0868ac' },
+                                { min: 8, max: 9.9, label: '8-9.9%', color: '#43a2ca' },
+                                { min: 6, max: 7.9, label: '6-7.9%', color: '#7bccc4' },
+                                { min: 4, max: 5.9, label: '4-5.9%', color: '#bae4bc' },
+                                { min: 0, max: 3.9, label: '<4%', color: '#f0f9e8' }
+                            ],
+                            orient: 'horizontal',
+                            left: 'center',
+                            bottom: 10,
+                            textStyle: { color: '#666' },
+                            borderColor: '#AAD6E3'
+                        },
+                        series: [{
+                            type: 'map',
+                            map: 'world',
+                            roam: true, // 支持缩放和平移
+                            zoom: 1.2,
+                            itemStyle: {
+                                borderColor: '#AAD6E3',
+                                borderWidth: 0.8,
+                                areaColor: '#f0f9e8' // 未匹配区域默认颜色
+                            },
+                            emphasis: { // 鼠标悬停样式
+                                itemStyle: {
+                                    areaColor: '#43a2ca',
+                                    borderColor: '#0868ac'
+                                },
+                                label: { show: true, color: '#333' }
+                            },
+                            data: countryData
+                        }]
+                    };
+
+                    // 年龄分布柱形图配置
+                    const ageOption = {
+                        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                        xAxis: {
+                            type: 'category',
+                            data: ageData.xAxis || ['0-20', '21-44', '45-64', '65+'],
+                            axisLine: { lineStyle: { color: '#C5E1E9' } }
+                        },
+                        yAxis: {
+                            type: 'value',
+                            name: '患病率(%)',
+                            axisLine: { lineStyle: { color: '#C5E1E9' } }
+                        },
+                        series: [{
+                            data: ageData.seriesData || [1, 1.9, 8.9, 23.7],
+                            type: 'bar',
+                            itemStyle: { color: '#43a2ca' }
+                        }]
+                    };
+
+                    // 性别比例饼图配置
+                    const genderOption = {
+                        tooltip: { trigger: 'item' },
+                        legend: { orient: 'vertical', left: 10 },
+                        series: [{
+                            name: '性别比例',
+                            type: 'pie',
+                            radius: ['40%', '70%'],
+                            avoidLabelOverlap: false,
+                            itemStyle: {
+                                borderRadius: 10,
+                                borderColor: '#fff',
+                                borderWidth: 2
+                            },
+                            label: { show: false, position: 'center' },
+                            emphasis: {
+                                label: { show: true, fontSize: 16, fontWeight: 'bold' }
+                            },
+                            labelLine: { show: false },
+                            data: genderData || [
+                                { value: 52, name: '男性' },
+                                { value: 48, name: '女性' }
+                            ],
+                            color: ['#0868ac', '#7bccc4']
+                        }]
+                    };
+
+                    // 血糖趋势折线图配置
+                    const bloodSugarOption = {
+                        tooltip: { trigger: 'axis' },
+                        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: bloodSugarData.xAxis || ['1990', '2015', '2017', '2019', '2022'],
+                            axisLine: { lineStyle: { color: '#C5E1E9' } }
+                        },
+                        yAxis: {
+                            type: 'value',
+                            name: '糖尿病患病率',
+                            axisLine: { lineStyle: { color: '#C5E1E9' } }
+                        },
+                        series: [{
+                            data: bloodSugarData.seriesData || [7, 8.4, 8.3, 9.3, 14],
+                            type: 'line',
+                            smooth: true,
+                            lineStyle: { color: '#0868ac' },
+                            itemStyle: { color: '#43a2ca' }
+                        }]
+                    };
+
+                    // 地理分布饼图配置
+                    const geoDistributionOption = {
+                        tooltip: { trigger: 'item' },
+                        legend: { 
+                            orient: 'horizontal',
+                            left: 'center',
+                            bottom: 0,
+                            textStyle: { 
+                                fontSize: 12,
+                                color: '#666'
+                            },
+                            itemWidth: 12,
+                            itemHeight: 12,
+                            itemGap: 15
+                        },
+                        grid: {
+                            top: '5%',
+                            bottom: '30%',
+                            left: '5%',
+                            right: '5%'
+                        },
+                        series: [{
+                            name: '地区分布',
+                            type: 'pie',
+                            radius: ['30%', '60%'],
+                            center: ['50%', '40%'],
+                            avoidLabelOverlap: false,
+                            itemStyle: {
+                                borderRadius: 6,
+                                borderColor: '#fff',
+                                borderWidth: 2
+                            },
+                            label: { 
+                                show: true, 
+                                position: 'outside',
+                                formatter: '{b}: {c}%',
+                                fontSize: 11
+                            },
+                            labelLine: { show: true, length: 15, length2: 10 },
+                            data: geoDistributionData || continentData,
+                            color: ['#0868ac', '#43a2ca', '#7bccc4', '#bae4bc', '#ccebc5', '#e0f3db', '#f0f9e8']
+                        }]
+                    };
+
+                    // 设置图表数据
+                    mapChart.setOption(mapOption);
+                    ageChart.setOption(ageOption);
+                    genderChart.setOption(genderOption);
+                    bloodSugarChart.setOption(bloodSugarOption);
+                    geoDistributionChart.setOption(geoDistributionOption);
+
+                    // 隐藏加载状态
+                    loadingIndicator.classList.add('hidden');
+
+                    // 响应窗口大小变化
+                    window.addEventListener('resize', () => {
+                        mapChart.resize();
+                        ageChart.resize();
+                        genderChart.resize();
+                        bloodSugarChart.resize();
+                        geoDistributionChart.resize();
+                    });
+
+                    logDebug('所有图表初始化完成');
+
+                } catch (error) {
+                    logDebug('图表初始化错误: ' + error.message);
+                    // 显示错误状态
+                    loadingIndicator.classList.add('hidden');
+                    errorMessage.textContent = error.message || '地图加载失败，请重试';
+                    errorIndicator.classList.remove('hidden');
+                }
+            }
+
+            // 重试按钮事件
+            retryButton.addEventListener('click', initCharts);
+
+            // 初始化图表
+            initCharts();
+            
+            // 趋势分析跳转逻辑
+            const trendLinks = document.querySelectorAll('.trend-link');
+            trendLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // 跳转到趋势分析页面（替换为实际路径）
+                    window.location.href = 'inter-trend.html';
+                    
+                    // 可选：添加加载动画（示例）
+                    const loading = document.createElement('div');
+                    loading.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+                    loading.innerHTML = `
+                        <div class="bg-white p-6 rounded-lg text-center">
+                            <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                            <p>正在加载趋势分析数据...</p>
+                        </div>
+                    `;
+                    document.body.appendChild(loading);
+                    
+                    // 模拟加载延迟（实际可移除）
+                    setTimeout(() => {
+                        document.body.removeChild(loading);
+                    }, 800);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

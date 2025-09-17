@@ -1,0 +1,228 @@
+/* 基础重置 & 全局样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Microsoft YaHei", sans-serif  'Inter';
+  background: #FBFADA; /* 全局底色：浅米色 */
+  color: #12372A; /* 全局字体颜色：深绿色 */
+  min-height: 120vh;
+  overflow-x: hidden;
+}
+
+/* 头部样式 */
+header {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 40px;
+  background: linear-gradient(135deg, #ADBC9F, #FBFADA); /* 渐变：浅绿到浅米 */
+  border-bottom: 1px solid #43685033; /* 边框：深绿半透明 */
+}
+header h1 {
+  font-size: 36px;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(18, 55, 42, 0.1);
+  text-align: center;
+  color: #12372A; /* 标题颜色：深绿色 */
+}
+
+.showTime {
+  font-size: 16px;
+  background: rgba(251, 250, 218, 0.7); /* 浅米半透明 */
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: #12372A; /* 时间颜色：深绿色 */
+  position: absolute;
+  top:75%;
+  right:20px;
+  transform: translateY(-50%);
+  border: 1px solid #43685022; /* 边框：深绿半透明 */
+}
+
+/* 导航栏样式 */
+.nav-bar {
+  background: linear-gradient(135deg, #436850, #12372A); /* 渐变：中绿到深绿 */
+  border-bottom: 1px solid #ADBC9F33; /* 边框：浅绿半透明 */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  opacity: 0.95; /* 导航栏透明度 */
+}
+
+/* Logo 文本和图标颜色 */
+.logo-text {
+  color: #FBFADA; /* 浅米色，与导航栏深绿背景形成对比 */
+}
+
+.logo-text i {
+  color: #ADBC9F; /* 图标单独设置为浅绿色，增加细节层次 */
+}
+
+.nav-link, .mobile-nav-link {
+  display: block;
+  padding: 0.5rem 0;
+  color: #FBFADA; /* 导航文字：浅米色 */
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover, .mobile-nav-link:hover {
+  color: #ADBC9F; /* 悬停颜色：浅绿色 */
+}
+
+.nav-link.active, .mobile-nav-link.active {
+  color: #ADBC9F; /* 活动状态颜色：浅绿色 */
+  font-weight: 500;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #ADBC9F; /* 活动下划线：浅绿色 */
+}
+
+.mobile-nav-link.active::before {
+  content: '• ';
+  color: #ADBC9F; /* 移动端活动标识：浅绿色 */
+}
+
+.nav-toggle {
+  background: transparent;
+  border: none;
+  color: #FBFADA; /* 菜单按钮颜色：浅米色 */
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+/* 主体布局：Flex 实现左右 + 中间 */
+.dashboard {
+  display: flex;
+  padding: 30px;
+  gap: 30px;
+  min-height: calc(100vh - 140px); /* 减去 header 和 nav 高度 */
+}
+
+/* 左右图表列 */
+.chart-column {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* 中间地图列 */
+.map-column {
+  width: 50%; 
+  height: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.map {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #ADBC9F, #FBFADA); /* 地图背景：浅绿到浅米 */
+  border: 2px solid #43685022; /* 边框：中绿半透明 */
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(18, 55, 42, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.map-placeholder {
+  font-size: 20px;
+  color: #12372A; /* 地图文字：深绿色 */
+  opacity: 0.8;
+}
+
+/* 面板通用样式 */
+.panel {
+  background: linear-gradient(145deg, #ADBC9F, #FBFADA); /* 面板背景：浅绿到浅米 */
+  border: 1px solid #43685022; /* 边框：中绿半透明 */
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(18, 55, 42, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: calc(50% - 15px); /* 调整高度以适应两个面板 */
+}
+.panel:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 25px rgba(18, 55, 42, 0.15);
+}
+
+.panel h2 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 15px;
+  color: #12372A; /* 面板标题：深绿色 */
+  border-bottom: 1px solid #43685022; /* 标题下划线：中绿半透明 */
+  padding-bottom: 10px;
+}
+
+/* 图表占位样式 */
+.chart {
+  flex: 1;
+  background: rgba(251, 250, 218, 0.7); /* 图表背景：浅米半透明 */
+  border: 1px solid #43685022; /* 边框：中绿半透明 */
+  border-radius: 8px;
+  display: flex;
+  justify-content:center;
+  align-items: center;
+  color: #12372A; /* 图表文字：深绿色 */
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+.chart:hover {
+  background: rgba(251, 250, 218, 0.9); /* 悬停时加深背景 */
+}
+
+/* 响应式适配 */
+@media (max-width: 1200px) {
+  .dashboard {
+    flex-direction: column;
+    align-items: center;
+  }
+  .chart-column,
+  .map-column {
+    width: 100%;
+    max-width: 600px; 
+  }
+  .map-column {
+    order: -1; /* 地图放顶部，提升移动端体验 */
+    height: 400px;
+  }
+  .panel {
+    height: auto; /* 移动端恢复自动高度 */
+  }
+}
+
+/* 移动端导航菜单 */
+@media (max-width: 768px) {
+  .nav-bar {
+    padding: 0.5rem 0;
+  }
+  
+  .mobile-nav-link {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #ADBC9F22; /* 移动端菜单分隔线：浅绿半透明 */
+  }
+  
+  .mobile-nav-link:last-child {
+    border-bottom: none;
+  }
+  
+  header h1 {
+    font-size: 28px;
+  }
+}
